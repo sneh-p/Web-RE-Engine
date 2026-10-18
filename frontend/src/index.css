@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Rendered Markdown (AI explanations, notes) */
+.md-body { font-size: 0.8125rem; line-height: 1.6; color: #c9d1d9; }
+.md-body h1, .md-body h2, .md-body h3 { color: #fff; font-weight: 700; margin: 1rem 0 0.4rem; }
+.md-body h1 { font-size: 1.05rem; }
+.md-body h2 { font-size: 0.95rem; }
+.md-body h3 { font-size: 0.875rem; }
+.md-body p { margin: 0.4rem 0; }
+.md-body ul, .md-body ol { margin: 0.4rem 0; padding-left: 1.25rem; }
+.md-body ul { list-style: disc; }
+.md-body ol { list-style: decimal; }
+.md-body li { margin: 0.15rem 0; }
+.md-body code { font-family: 'JetBrains Mono', Menlo, monospace; font-size: 0.75rem; background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 0 0.25rem; }
+.md-body pre { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 0.6rem; overflow-x: auto; margin: 0.5rem 0; }
+.md-body pre code { border: 0; padding: 0; }
+.md-body a { color: #388bfd; text-decoration: underline; }
+.md-body table { border-collapse: collapse; margin: 0.5rem 0; }
+.md-body th, .md-body td { border: 1px solid #30363d; padding: 0.2rem 0.5rem; }
+.md-body strong { color: #fff; }

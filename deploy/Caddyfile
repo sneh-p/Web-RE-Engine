@@ -1,0 +1,45 @@
+# Global options
+{
+    # The internal CA is for browsers, not this server: don't try to add its root to the
+    # server's own trust store (Caddy would try sudo as the caddy user and log an error)
+    skip_install_trust
+}
+
+# Redirect HTTP (:80) to HTTPS
+:80 {
+    redir https://{host}{uri} permanent
+}
+
+# IP-based HTTPS listeners with internal self-signed TLS
+https://192.168.40.61:443, https://37.19.211.48:443 {
+    tls internal
+
+    request_body {
+        max_size 520MB
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+        X-Frame-Options "DENY"
+    }
+
+    reverse_proxy 127.0.0.1:3001
+}
+
+# Example configuration for a real domain with automatic Let's Encrypt certificates:
+# re.example.com {
+#     request_body {
+#         max_size 520MB
+#     }
+#
+#     header {
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains"
+#         X-Content-Type-Options "nosniff"
+#         Referrer-Policy "no-referrer"
+#         X-Frame-Options "DENY"
+#     }
+#
+#     reverse_proxy 127.0.0.1:3001
+# }

@@ -1,0 +1,15 @@
+[Unit]
+Description=Web RE Engine Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/rea-web/backend
+ExecStart=/usr/bin/npx tsx src/app.ts
+Environment=NODE_ENV=production
+Restart=on-failure
+RestartSec=5s
+MemoryMax=3G
+
+[Install]
+WantedBy=multi-user.target

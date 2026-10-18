@@ -1,0 +1,79 @@
+import { issue } from "./AppleDispatchDecodeFacts.js";
+/**
+ * Parse an `@property` attribute string such as `T@"NSString",C,N,V_name`.
+ * Each comma-separated token is one attribute; `T` is the type encoding.
+ */
+export const parsePropertyAttributes = (name, attributes) => {
+    const tokens = attributes.length === 0 ? [] : splitAttributes(attributes);
+    const typeAttributes = tokens.filter((token) => token[0] === "T");
+    const typeAttribute = typeAttributes.length === 1 ? typeAttributes[0] : undefined;
+    const typeEncoding = typeAttribute !== undefined && typeAttribute.length > 1
+        ? typeAttribute.slice(1)
+        : null;
+    const value = (code) => tokens.find((token) => token[0] === code)?.slice(1) ?? null;
+    return {
+        name,
+        type_encoding: typeEncoding,
+        attributes: tokens.map((token) => ({
+            name: token.slice(0, 1),
+            value: token.slice(1),
+        })),
+        atomicity: tokens.includes("N")
+            ? "nonatomic"
+            : typeEncoding === null
+                ? null
+                : "atomic",
+        is_readonly: tokens.includes("R")
+            ? true
+            : typeEncoding === null
+                ? null
+                : false,
+        getter: value("G"),
+        setter: value("S"),
+    };
+};
+/** Split on commas that are outside a quoted class name in the type encoding. */
+const splitAttributes = (attributes) => {
+    const tokens = [];
+    let current = "";
+    let quoted = false;
+    for (const character of attributes) {
+        if (character === '"')
+            quoted = !quoted;
+        if (character === "," && !quoted) {
+            tokens.push(current);
+            current = "";
+        }
+        else
+            current += character;
+    }
+    tokens.push(current);
+    return tokens.filter((token) => token.length > 0);
+};
+/** Decode `property_list_t { entsize_and_flags, count, property_t[] }`. */
+export const readObjcPropertyList = (read, list, admit) => {
+    if (list === 0n)
+        return [];
+    const entrySize = read.u32(list) & ~3;
+    const count = read.u32(list + 4n);
+    if (entrySize !== 16)
+        throw new TypeError(`Unsupported Objective-C property entry size ${entrySize}`);
+    const properties = [];
+    for (let index = 0; index < count; index++) {
+        if (!admit())
+            break;
+        const entry = list + 8n + BigInt(index * entrySize);
+        properties.push(parsePropertyAttributes(read.string(read.pointer(entry)), read.string(read.pointer(entry + 8n))));
+    }
+    return properties;
+};
+/** Decode a property list, recording a failure for `owner` instead of throwing. */
+export const readObjcPropertiesOf = (read, list, context) => {
+    try {
+        return readObjcPropertyList(read, list, context.admit);
+    }
+    catch (cause) {
+        context.issues.push(issue("objc_properties_categories", "property_decode_failed", `${context.owner}: ${cause instanceof Error ? cause.message : String(cause)}`, context.location));
+        return [];
+    }
+};
